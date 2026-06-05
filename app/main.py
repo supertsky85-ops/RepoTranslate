@@ -15,6 +15,7 @@ from fastapi.staticfiles import StaticFiles
 
 from app.core.config import Settings
 from app.services.github_client import GitHubClient
+from app.services.path_helper import get_base_dir
 
 # ── Logging ────────────────────────────────────────────────────
 
@@ -72,7 +73,7 @@ def create_app() -> FastAPI:
     # Mount static files (CSS, JS)
     app.mount(
         "/static",
-        StaticFiles(directory="app/web/static"),
+        StaticFiles(directory=os.path.join(get_base_dir(), "app/web/static")),
         name="static",
     )
 

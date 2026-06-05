@@ -6,6 +6,7 @@ Context does NOT need "request" key — it's added automatically.
 
 import asyncio
 import logging
+import os
 
 from fastapi import APIRouter, Request, Form
 from fastapi.responses import HTMLResponse
@@ -30,12 +31,13 @@ from app.analyzers.roadmap import RoadmapAnalyzer
 from app.services.token_manager import save_token, mask_token, load_token
 from app.services.github_client import GitHubClient
 from app.services.report_renderer import render_report
+from app.services.path_helper import get_base_dir
 
 logger = logging.getLogger(__name__)
 
 web_router = APIRouter()
 
-templates = Jinja2Templates(directory="app/web/templates")
+templates = Jinja2Templates(directory=os.path.join(get_base_dir(), "app/web/templates"))
 
 # ── Analyzer setup ──────────────────────────────────────────
 
