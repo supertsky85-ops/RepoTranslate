@@ -1,0 +1,52 @@
+{% extends "base.html.j2" %}
+{% block title %}RepoTranslate — GitHub 仓库分析{% endblock %}
+
+{% block content %}
+<section class="hero">
+    <h1>分析任何 GitHub 仓库</h1>
+    <p class="subtitle">
+        输入 GitHub 地址，即刻查看技术栈、架构、代码质量、贡献者等全方位分析报告。
+    </p>
+
+    <form
+        id="analyze-form"
+        hx-post="/analyze"
+        hx-target="#result-area"
+        hx-swap="innerHTML"
+        hx-indicator="#loading"
+        class="analyze-form"
+    >
+        <div class="input-group">
+            <input
+                type="url"
+                name="github_url"
+                id="github-url"
+                placeholder="https://github.com/作者/仓库名"
+                required
+                autofocus
+                class="url-input"
+            >
+            <button type="submit" class="btn-primary" id="submit-btn">
+                开始分析
+            </button>
+        </div>
+        <p class="hint">
+            试试：
+            <a href="#" onclick="document.getElementById('github-url').value='https://github.com/psf/requests'; document.getElementById('analyze-form').requestSubmit(); return false;">psf/requests</a>
+            ·
+            <a href="#" onclick="document.getElementById('github-url').value='https://github.com/fastapi/fastapi'; document.getElementById('analyze-form').requestSubmit(); return false;">fastapi/fastapi</a>
+            ·
+            <a href="#" onclick="document.getElementById('github-url').value='https://github.com/microsoft/vscode'; document.getElementById('analyze-form').requestSubmit(); return false;">microsoft/vscode</a>
+        </p>
+    </form>
+
+    <div id="loading" class="htmx-indicator">
+        <div class="spinner"></div>
+        <p>正在获取仓库数据...</p>
+    </div>
+</section>
+
+<section id="result-area">
+    <!-- htmx 在此处加载分析结果 -->
+</section>
+{% endblock %}

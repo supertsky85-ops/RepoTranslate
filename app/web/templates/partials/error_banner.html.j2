@@ -1,0 +1,11 @@
+{# 错误提示 #}
+<div class="error-banner" id="error-banner">
+    <div class="error-icon">❌</div>
+    <div class="error-content">
+        <h3>出错了</h3>
+        <p>{{ error }}</p>
+        {% if detail %}
+        <pre class="error-detail">{{ detail }}</pre>
+        {% endif %}
+    </div>
+</div>

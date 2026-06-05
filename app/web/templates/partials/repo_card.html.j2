@@ -1,0 +1,77 @@
+{# 仓库基本信息卡片 #}
+<div class="repo-card" id="repo-card">
+    <div class="repo-header">
+        <div class="repo-identity">
+            <h2>
+                <a href="{{ repo.html_url }}" target="_blank" rel="noopener">
+                    {{ repo.full_name }}
+                </a>
+            </h2>
+            {% if repo.description %}
+            <p class="repo-description">{{ repo.description }}</p>
+            {% endif %}
+        </div>
+        {% set license_key = repo.license.key if repo.license else 'none' %}
+        {% if license_key != 'none' %}
+        <span class="license-badge">
+            {{ repo.license.get('spdx_id', license_key) }}
+        </span>
+        {% endif %}
+    </div>
+
+    <div class="stats-grid">
+        <div class="stat-item">
+            <span class="stat-icon">⭐</span>
+            <span class="stat-value">{{ repo.stargazers_count | default(0) }}</span>
+            <span class="stat-label">Star</span>
+        </div>
+        <div class="stat-item">
+            <span class="stat-icon">🍴</span>
+            <span class="stat-value">{{ repo.forks_count | default(0) }}</span>
+            <span class="stat-label">Fork</span>
+        </div>
+        <div class="stat-item">
+            <span class="stat-icon">⚠️</span>
+            <span class="stat-value">{{ repo.open_issues_count | default(0) }}</span>
+            <span class="stat-label">未关闭 Issue</span>
+        </div>
+        <div class="stat-item">
+            <span class="stat-icon">👀</span>
+            <span class="stat-value">{{ repo.watchers_count | default(0) }}</span>
+            <span class="stat-label">关注者</span>
+        </div>
+        <div class="stat-item">
+            <span class="stat-icon">📏</span>
+            <span class="stat-value">{{ (repo.size | default(0)) // 1024 }}MB</span>
+            <span class="stat-label">仓库大小</span>
+        </div>
+    </div>
+
+    <div class="repo-meta">
+        {% if repo.language %}
+        <span class="meta-item">
+            <span class="lang-dot lang-{{ repo.language | lower }}"></span>
+            {{ repo.language }}
+        </span>
+        {% endif %}
+        <span class="meta-item">📅 创建于 {{ repo.created_at[:10] }}</span>
+        <span class="meta-item">🔄 更新于 {{ repo.updated_at[:10] }}</span>
+        {% if repo.default_branch %}
+        <span class="meta-item">🌿 {{ repo.default_branch }} 分支</span>
+        {% endif %}
+    </div>
+
+    {% if repo.topics %}
+    <div class="topics">
+        {% for topic in repo.topics %}
+        <span class="topic-tag">{{ topic }}</span>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    {% if repo.homepage %}
+    <div class="homepage-link">
+        🔗 <a href="{{ repo.homepage }}" target="_blank" rel="noopener">{{ repo.homepage }}</a>
+    </div>
+    {% endif %}
+</div>

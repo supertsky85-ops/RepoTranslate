@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}RepoTranslate{% endblock %}</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <script src="/static/js/htmx.min.js"></script>
+    {% block head %}{% endblock %}
+</head>
+<body>
+    <header class="navbar">
+        <div class="container">
+            <a href="/" class="logo">🔍 RepoTranslate</a>
+            <span class="tagline">GitHub 项目分析工具</span>
+            <a href="/settings" class="nav-link">⚙️ 设置</a>
+        </div>
+    </header>
+
+    <main class="container">
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <p>RepoTranslate v0.1.0 — 深度分析任何 GitHub 仓库</p>
+        </div>
+    </footer>
+</body>
+</html>

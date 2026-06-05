@@ -1,0 +1,51 @@
+{% extends "base.html.j2" %}
+{% block title %}设置 — RepoTranslate{% endblock %}
+
+{% block content %}
+<section class="settings-page">
+    <h1>⚙️ 设置</h1>
+
+    <div class="settings-card">
+        <h2>GitHub Token</h2>
+        <p class="settings-desc">
+            不配置 Token 时，GitHub API 限制为 <strong>60次/小时</strong>。
+            配置 Personal Access Token 后，可提升至 <strong>5000次/小时</strong>。
+            <a href="https://github.com/settings/tokens" target="_blank" rel="noopener">
+                去创建 Token →
+            </a>
+        </p>
+
+        <form hx-post="/settings/token" hx-target="#token-status" hx-swap="innerHTML" class="token-form">
+            <div class="input-group">
+                <input
+                    type="password"
+                    name="token"
+                    placeholder="ghp_xxxxxxxxxxxxxxxxxxxx"
+                    class="url-input"
+                    value="{{ token_masked or '' }}"
+                >
+                <button type="submit" class="btn-primary">保存 Token</button>
+            </div>
+        </form>
+
+        <div id="token-status">
+            {% if token_configured %}
+            <div class="token-ok">✅ Token 已配置 — {{ rate_limit_summary }}</div>
+            {% else %}
+            <div class="token-warn">⚠️ 未配置 Token — 限制为 60 次/小时</div>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="settings-card">
+        <h2>关于</h2>
+        <p class="settings-desc">
+            RepoTranslate v0.1.0 — 深度分析 GitHub 仓库的技术栈、架构、
+            代码活跃度、贡献者健康度等。
+        </p>
+        <div class="about-stats">
+            <span>已加载 {{ analyzer_count }} 个分析器</span>
+        </div>
+    </div>
+</section>
+{% endblock %}

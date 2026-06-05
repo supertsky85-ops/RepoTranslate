@@ -1,0 +1,266 @@
+{# 分析结果 — 所有模块必定显示，无评分 #}
+
+{# 先把 output 按 analyzer_id 归类 #}
+{% set ns = namespace(
+    basic=None, readme=None, tech=None, arch=None, quality=None, contrib=None, roadmap=None
+) %}
+{% for o in result.outputs %}
+    {% if o.analyzer_id == 'basic_stats' %}{% set ns.basic = o %}
+    {% elif o.analyzer_id == 'readme_summary' %}{% set ns.readme = o %}
+    {% elif o.analyzer_id == 'tech_stack' %}{% set ns.tech = o %}
+    {% elif o.analyzer_id == 'architecture' %}{% set ns.arch = o %}
+    {% elif o.analyzer_id == 'code_quality' %}{% set ns.quality = o %}
+    {% elif o.analyzer_id == 'contributors' %}{% set ns.contrib = o %}
+    {% elif o.analyzer_id == 'roadmap' %}{% set ns.roadmap = o %}
+    {% endif %}
+{% endfor %}
+
+<div class="analysis-section" id="analysis-section">
+    <h3 class="section-title">分析报告</h3>
+
+    {# ============ 1. 技术栈（放最前面） ============ #}
+    <div class="info-card">
+        <h4>技术栈</h4>
+        {% if ns.tech and ns.tech.details.languages %}
+        <div class="lang-bars">
+            <div class="sections-label">语言分布</div>
+            {% set total_bytes = ns.tech.details.languages | map(attribute='bytes') | sum %}
+            {% for lang in ns.tech.details.languages[:8] %}
+            {% if lang.bytes > 0 %}
+            <div class="lang-bar">
+                <span class="lang-name">{{ lang.name }}</span>
+                <div class="lang-track">
+                    <div class="lang-fill" style="width: {{ (lang.bytes / total_bytes * 100) | round(1) }}%"></div>
+                </div>
+                <span class="lang-pct">{{ (lang.bytes / total_bytes * 100) | round(1) }}%</span>
+            </div>
+            {% endif %}
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        {% if ns.tech and ns.tech.details.categories %}
+        <div class="tech-categories">
+            {% for cat_name, cat_items in ns.tech.details.categories.items() %}
+            {% if cat_items %}
+            <div class="tech-cat">
+                <span class="cat-label">{{ cat_name }}</span>
+                <div class="cat-tags">
+                    {% for item in cat_items %}
+                    <span class="tech-tag">{{ item }}</span>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        {% if ns.tech and ns.tech.details.detected %}
+        <div class="tech-all">
+            <div class="sections-label">全部检测到的工具 ({{ ns.tech.details.detected|length }})</div>
+            <div class="cat-tags">
+                {% for t in ns.tech.details.detected %}
+                <span class="tech-tag">{{ t }}</span>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        {% if not ns.tech or (not ns.tech.details.languages and not ns.tech.details.categories) %}
+        <p class="no-data">未检测到技术栈信息</p>
+        {% endif %}
+    </div>
+
+    {# ============ 2. README 深度分析 ============ #}
+    <div class="info-card">
+        <h4>README 文档</h4>
+        {% if ns.readme %}
+        <p class="card-summary">{{ ns.readme.summary }}</p>
+
+        {% if ns.readme.details.preview %}
+        <div class="readme-preview">
+            <div class="preview-label">项目简介</div>
+            <div class="preview-text">{{ ns.readme.details.preview }}</div>
+        </div>
+        {% endif %}
+
+        {% if ns.readme.details.tech_requirements %}
+        <div class="readme-tech">
+            <span class="sections-label">README 中提到的技术：</span>
+            {% for t in ns.readme.details.tech_requirements %}
+            <span class="tech-tag">{{ t }}</span>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        {% if ns.readme.details.install_text %}
+        <div class="readme-install">
+            <div class="sections-label">安装方式</div>
+            <pre class="install-box">{{ ns.readme.details.install_text }}</pre>
+        </div>
+        {% endif %}
+
+        {% if ns.readme.details.usage_text %}
+        <div class="readme-install">
+            <div class="sections-label">使用示例</div>
+            <pre class="install-box">{{ ns.readme.details.usage_text }}</pre>
+        </div>
+        {% endif %}
+
+        {% if ns.readme.details.examples %}
+        <div class="readme-code">
+            <div class="sections-label">代码示例</div>
+            {% for ex in ns.readme.details.examples[:3] %}
+            <pre class="code-box"><span class="code-lang">{{ ex.lang }}</span>{{ ex.code }}</pre>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        {% if ns.readme.details.links %}
+        <div class="readme-links">
+            <div class="sections-label">外部链接</div>
+            <div class="links-list">
+                {% for link in ns.readme.details.links[:10] %}
+                <a href="{{ link.url }}" target="_blank" rel="noopener" class="ext-link">{{ link.label }}</a>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        {% if ns.readme.details.sections %}
+        <div class="readme-sections">
+            <div class="sections-label">文档章节 ({{ ns.readme.details.sections|length }})</div>
+            <div class="sections-list">
+                {% for section in ns.readme.details.sections %}
+                <span class="section-chip">{{ section }}</span>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        {% if ns.readme.recommendations %}
+        <div class="recommendations">
+            {% for rec in ns.readme.recommendations %}
+            <div class="rec-item">{{ rec }}</div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        {% else %}
+        <p class="no-data">未找到 README 文件</p>
+        {% endif %}
+    </div>
+
+    {# ============ 3. 技术路线 ============ #}
+    <div class="info-card">
+        <h4>技术路线</h4>
+        {% if ns.roadmap and ns.roadmap.details.timeline %}
+        <p class="card-summary">{{ ns.roadmap.summary }}</p>
+        <div class="roadmap-timeline">
+            <div class="sections-label">版本演进</div>
+            <div class="timeline-track">
+                {% for ver in ns.roadmap.details.timeline %}
+                <div class="timeline-dot"></div>
+                <span class="timeline-ver">{{ ver }}</span>
+                {% endfor %}
+            </div>
+        </div>
+        {% if ns.roadmap.details.releases %}
+        <div class="release-list">
+            {% for rel in ns.roadmap.details.releases[:5] %}
+            <div class="release-item">
+                <strong>{{ rel.tag }}</strong>
+                <span class="release-date">{{ rel.date }}</span>
+                {% if rel.summary %}<p class="release-summary">{{ rel.summary[:150] }}</p>{% endif %}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        {% else %}
+        <p class="no-data">该项目暂无 Release 记录（可能使用持续发布模式）</p>
+        {% endif %}
+    </div>
+
+    {# ============ 4. 项目架构 ============ #}
+    <div class="info-card">
+        <h4>项目架构</h4>
+        {% if ns.arch %}
+        <p class="card-summary">{{ ns.arch.summary }}</p>
+        {% if ns.arch.details.diagram %}
+        <div class="arch-diagram">
+            <div class="sections-label">目录结构</div>
+            <pre class="diagram-box">{{ ns.arch.details.diagram }}</pre>
+        </div>
+        {% endif %}
+        {% if ns.arch.details.arch_description %}
+        <div class="arch-summary"><p>{{ ns.arch.details.arch_description }}</p></div>
+        {% endif %}
+        {% if ns.arch.recommendations %}
+        <div class="recommendations">
+            {% for rec in ns.arch.recommendations %}<div class="rec-item">{{ rec }}</div>{% endfor %}
+        </div>
+        {% endif %}
+        {% else %}
+        <p class="no-data">暂无架构分析数据</p>
+        {% endif %}
+    </div>
+
+    {# ============ 5. 仓库概况 ============ #}
+    <div class="info-card">
+        <h4>仓库概况</h4>
+        {% if ns.basic %}
+        <p class="card-summary">{{ ns.basic.summary }}</p>
+        {% if ns.basic.recommendations %}
+        <div class="recommendations">
+            {% for rec in ns.basic.recommendations %}<div class="rec-item">{{ rec }}</div>{% endfor %}
+        </div>
+        {% endif %}
+        {% else %}
+        <p class="no-data">暂无数据</p>
+        {% endif %}
+    </div>
+
+    {# ============ 6. 代码活跃度 ============ #}
+    <div class="info-card">
+        <h4>代码活跃度</h4>
+        {% if ns.quality %}
+        <p class="card-summary">{{ ns.quality.summary }}</p>
+        {% if ns.quality.recommendations %}
+        <div class="recommendations">
+            {% for rec in ns.quality.recommendations %}<div class="rec-item">{{ rec }}</div>{% endfor %}
+        </div>
+        {% endif %}
+        {% else %}
+        <p class="no-data">暂无数据</p>
+        {% endif %}
+    </div>
+
+    {# ============ 7. 贡献者 ============ #}
+    <div class="info-card">
+        <h4>贡献者</h4>
+        {% if ns.contrib %}
+        <p class="card-summary">{{ ns.contrib.summary }}</p>
+        {% if ns.contrib.details.top_contributors %}
+        <div class="contributor-section">
+            <div class="sections-label">核心贡献者</div>
+            <div class="contributor-row">
+                {% for c in ns.contrib.details.top_contributors[:8] %}
+                <div class="contributor-avatar" title="{{ c.login }}: {{ c.contributions }} 次提交">
+                    <img src="{{ c.avatar }}&s=48" alt="{{ c.login }}" width="40" height="40" loading="lazy">
+                    <span class="contributor-name">{{ c.login }}</span>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+        {% if ns.contrib.recommendations %}
+        <div class="recommendations">
+            {% for rec in ns.contrib.recommendations %}<div class="rec-item">{{ rec }}</div>{% endfor %}
+        </div>
+        {% endif %}
+        {% else %}
+        <p class="no-data">暂无数据</p>
+        {% endif %}
+    </div>
+
+</div>
